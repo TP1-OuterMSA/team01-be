@@ -1,1 +1,1 @@
-# _be-template
+https://www.notion.so/INSERT-SQL-1c39084da93d807ba255d150e9bb320b?pvs=25
