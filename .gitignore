@@ -23,7 +23,4 @@ gradle-app.setting
 .idea/
 
 # Spring Boot application properties
-application.yml
-application.properties
-
 src/main/resources/application.yml
