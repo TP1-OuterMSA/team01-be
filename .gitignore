@@ -21,3 +21,7 @@ gradle-app.setting
 .classpath
 
 .idea/
+
+# Spring Boot application properties
+application.yml
+application.properties
