@@ -8,8 +8,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 0350
       MYSQL_DATABASE: teamProject
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 0350
     ports:
       - "3306:3306"
     volumes:
