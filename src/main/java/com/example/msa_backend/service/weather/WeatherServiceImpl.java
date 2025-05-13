@@ -102,7 +102,7 @@ public class WeatherServiceImpl implements  WeatherService {
             log.info("🌤 날씨 정보 저장 완료: {} {} {} {}℃ {}%", v[0], v[1], v[2], v[3], v[4]);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("🌧 날씨 정보 처리 중 오류 발생", e);
             return null;
         } finally {
             if (con != null) con.disconnect();
