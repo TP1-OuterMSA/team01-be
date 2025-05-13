@@ -50,9 +50,6 @@ public class AtePeople {
 
     @PrePersist
     public void setTimeByMealType() {
-        // 서울 시간 기준으로 날짜 설정
-        ZonedDateTime nowSeoul = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
-        this.date = nowSeoul.toLocalDate();
 
         // 식사 타입에 따라 시간 자동 지정
         if (this.time == null) {
