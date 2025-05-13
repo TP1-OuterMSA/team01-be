@@ -10,8 +10,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 @Entity
 @Getter
@@ -42,11 +40,6 @@ public class AtePeople {
     @Enumerated(EnumType.STRING)
     @Column(name = "meal_type", nullable = false)
     private MealType mealType;
-
-    @Setter
-    @Enumerated(EnumType.STRING)
-    @Column(name = "weather", nullable = false)
-    private Weather weather;
 
     @PrePersist
     public void setTimeByMealType() {

@@ -1,4 +1,4 @@
-package com.example.msa_backend.service.Weather;
+package com.example.msa_backend.service.weather;
 
 import com.example.msa_backend.domain.WeatherLog;
 import com.example.msa_backend.repository.WeatherRepository;
