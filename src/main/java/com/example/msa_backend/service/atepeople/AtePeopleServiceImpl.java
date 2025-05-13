@@ -1,15 +1,13 @@
-package com.example.msa_backend.service.AtePeople;
+package com.example.msa_backend.service.atepeople;
 
 import com.example.msa_backend.converter.AtePeopleConverter;
-import com.example.msa_backend.converter.FoodWasteConverter;
+import com.example.msa_backend.converter.WeatherConverter;
 import com.example.msa_backend.domain.AtePeople;
-import com.example.msa_backend.domain.FoodWaste;
+import com.example.msa_backend.domain.WeatherLog;
 import com.example.msa_backend.domain.enums.MealType;
 import com.example.msa_backend.domain.enums.Weather;
 import com.example.msa_backend.repository.AtePeopleRepository;
-import com.example.msa_backend.repository.FoodWasteRepository;
-import com.example.msa_backend.web.dto.food.FoodWasteRequestDTO;
-import com.example.msa_backend.web.dto.food.FoodWasteResponseDTO;
+import com.example.msa_backend.repository.WeatherRepository;
 import com.example.msa_backend.web.dto.people.AtePeopleRequestDTO;
 import com.example.msa_backend.web.dto.people.AtePeopleResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class AtePeopleServiceImpl implements AtePeopleService {
 
     private final AtePeopleRepository atePeopleRepository;
-
+    private final WeatherRepository weatherRepository;
 
     @Override
     public AtePeopleResponseDTO.AtePeopleDTO postAtePeople(AtePeopleRequestDTO.addDTO atePeopleRequestDTO) {
@@ -41,7 +41,6 @@ public class AtePeopleServiceImpl implements AtePeopleService {
         if (existing != null) {
             // 기존 데이터가 있으면 값 업데이트
             existing.setPeople(atePeopleRequestDTO.getPeople());
-            existing.setWeather(atePeopleRequestDTO.getWeather());
             return AtePeopleConverter.toAtePeopleResponseDTO(existing);
         } else {
             // 없으면 새로 생성
@@ -50,33 +49,23 @@ public class AtePeopleServiceImpl implements AtePeopleService {
         }
     }
 
-
     @Override
-    public AtePeopleResponseDTO.AtePeopleDTO getPredictPeople(LocalDate date, String mealType, String weather) {
+    public AtePeopleResponseDTO.PredictPeople getPredictPeople(LocalDate date, String mealType) {
         LocalDate toDate = date.minusDays(1);       // 전날
-        LocalDate fromDate = toDate.minusDays(6);   // 1주일 준
+        LocalDate fromDate = toDate.minusDays(6);   // 1주일 전
 
         List<AtePeople> filtered = atePeopleRepository.findAllByDateBetween(fromDate, toDate);
 
+        MealType finalMealType = null;
         if (mealType != null && !mealType.isEmpty()) {
             try {
-                MealType finalMealType = MealType.valueOf(mealType.toUpperCase());
+                finalMealType = MealType.valueOf(mealType.toUpperCase());
+                MealType finalMealTypeForLambda = finalMealType;
                 filtered = filtered.stream()
-                        .filter(p -> p.getMealType() == finalMealType)
+                        .filter(p -> p.getMealType() == finalMealTypeForLambda)
                         .collect(Collectors.toList());
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Invalid mealType: " + mealType);
-            }
-        }
-
-        if (weather != null && !weather.isEmpty()) {
-            try {
-                Weather finalWeather = Weather.valueOf(weather.toUpperCase());
-                filtered = filtered.stream()
-                        .filter(p -> p.getWeather() == finalWeather)
-                        .collect(Collectors.toList());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid weather: " + weather);
             }
         }
 
@@ -84,19 +73,36 @@ public class AtePeopleServiceImpl implements AtePeopleService {
                 .mapToLong(AtePeople::getPeople)
                 .average()
                 .orElse(0.0);
-
         Long roundedAvg = Math.round(avg);
 
-        MealType finalMealType = mealType != null ? MealType.valueOf(mealType.toUpperCase()) : null;
-        Weather finalWeather = weather != null ? Weather.valueOf(weather.toUpperCase()) : null;
+        // 🔍 예측 대상 날짜 + mealType → time 계산
+        LocalTime time = null;
+        if (finalMealType != null) {
+            switch (finalMealType) {
+                case BREAKFAST -> time = LocalTime.of(9, 0);
+                case LUNCH     -> time = LocalTime.of(12, 0);
+                case DINNER    -> time = LocalTime.of(18, 0);
+            }
+        }
 
-        return AtePeopleResponseDTO.AtePeopleDTO.toDTO(
+        // 🔍 WeatherLog 조회
+        String dateStr = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String timeStr = time.format(DateTimeFormatter.ofPattern("HHmm"));
+
+        WeatherLog loggedWeather = weatherRepository.findTopByDateAndTime(dateStr, timeStr);
+        String rawStatus = (loggedWeather != null) ? loggedWeather.getStatus() : null;
+        Weather weatherEnum = WeatherConverter.fromStatus(rawStatus);
+
+        return AtePeopleResponseDTO.PredictPeople.toPredictDTO(
                 AtePeople.builder()
                         .date(date)
+                        .time(time)
                         .mealType(finalMealType)
-                        .weather(finalWeather)
                         .people(roundedAvg)
-                        .build()
+                        .build(),
+                weatherEnum
         );
     }
+
+
 }

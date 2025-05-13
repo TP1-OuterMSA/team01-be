@@ -22,7 +22,6 @@ public class AtePeopleResponseDTO {
         private final LocalDate date;
         private final Long people;
         private final MealType mealType;
-        private final Weather weather;
 
         public static AtePeopleDTO toDTO(AtePeople people) {
             return AtePeopleDTO.builder()
@@ -30,7 +29,6 @@ public class AtePeopleResponseDTO {
                     .date(people.getDate())
                     .people(people.getPeople())
                     .mealType(people.getMealType())
-                    .weather(people.getWeather())
                     .build();
         }
     }
@@ -43,16 +41,17 @@ public class AtePeopleResponseDTO {
         private final LocalDate date;
         private final Long people;
         private final MealType mealType;
-        private final Weather weather;
+        private final Weather weatherStatus; // ✅ enum 기반 필드
 
-        public static AtePeopleDTO toPredictDTO(AtePeople people) {
-            return AtePeopleDTO.builder()
+        public static PredictPeople toPredictDTO(AtePeople people, Weather weatherStatus) {
+            return PredictPeople.builder()
                     .id(people.getId())
                     .date(people.getDate())
                     .people(people.getPeople())
                     .mealType(people.getMealType())
-                    .weather(people.getWeather())
+                    .weatherStatus(weatherStatus) // ✅ 전달
                     .build();
         }
     }
+
 }

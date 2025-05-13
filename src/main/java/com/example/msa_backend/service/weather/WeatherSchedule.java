@@ -1,4 +1,4 @@
-package com.example.msa_backend.service.Weather;
+package com.example.msa_backend.service.weather;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

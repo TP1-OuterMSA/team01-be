@@ -18,7 +18,6 @@ public class AtePeopleConverter {
                 .date(atePeopleDTO.getDate())
                 .people(atePeopleDTO.getPeople())
                 .mealType(atePeopleDTO.getMealType())
-                .weather((atePeopleDTO.getWeather()))
                 .time(null)
                 .build();
     }

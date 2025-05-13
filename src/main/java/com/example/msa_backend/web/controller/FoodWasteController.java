@@ -1,7 +1,7 @@
 package com.example.msa_backend.web.controller;
 
 
-import com.example.msa_backend.service.FoodWaste.FoodWasteService;
+import com.example.msa_backend.service.foodwaste.FoodWasteService;
 import com.example.msa_backend.web.dto.food.FoodWasteRequestDTO;
 import com.example.msa_backend.web.dto.food.FoodWasteResponseDTO;
 import lombok.RequiredArgsConstructor;
