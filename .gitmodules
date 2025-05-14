@@ -1,3 +1,6 @@
 [submodule "src/main/avro"]
 	path = src/main/avro
 	url = https://github.com/Team-Project-MSA-InnerArchitecture/kafka-registry.git
+[submodule "src/src/main/avro"]
+	path = src/src/main/avro
+	url = https://github.com/Team-Project-MSA-InnerArchitecture/kafka-registry.git
