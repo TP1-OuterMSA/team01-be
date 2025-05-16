@@ -87,10 +87,12 @@ public class AtePeopleServiceImpl implements AtePeopleService {
 
         // 🔍 WeatherLog 조회
         String dateStr = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        assert time != null;
         String timeStr = time.format(DateTimeFormatter.ofPattern("HHmm"));
 
         WeatherLog loggedWeather = weatherRepository.findTopByDateAndTime(dateStr, timeStr);
         String rawStatus = (loggedWeather != null) ? loggedWeather.getStatus() : null;
+        assert rawStatus != null;
         Weather weatherEnum = WeatherConverter.fromStatus(rawStatus);
 
         return AtePeopleResponseDTO.PredictPeople.toPredictDTO(
