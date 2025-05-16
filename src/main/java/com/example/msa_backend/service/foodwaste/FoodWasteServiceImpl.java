@@ -1,4 +1,4 @@
-package com.example.msa_backend.service.FoodWaste;
+package com.example.msa_backend.service.foodwaste;
 
 import com.example.msa_backend.converter.FoodWasteConverter;
 import com.example.msa_backend.domain.FoodWaste;

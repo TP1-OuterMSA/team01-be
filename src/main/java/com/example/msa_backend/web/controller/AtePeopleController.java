@@ -1,17 +1,12 @@
 package com.example.msa_backend.web.controller;
 
-
-import com.example.msa_backend.service.AtePeople.AtePeopleService;
-import com.example.msa_backend.service.FoodWaste.FoodWasteService;
-import com.example.msa_backend.web.dto.food.FoodWasteRequestDTO;
-import com.example.msa_backend.web.dto.food.FoodWasteResponseDTO;
+import com.example.msa_backend.service.atepeople.AtePeopleService;
 import com.example.msa_backend.web.dto.people.AtePeopleRequestDTO;
 import com.example.msa_backend.web.dto.people.AtePeopleResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 
 @RestController
@@ -28,11 +23,10 @@ public class AtePeopleController {
     }
 
     @GetMapping("/predict")
-    public AtePeopleResponseDTO.AtePeopleDTO getWaste(
+    public AtePeopleResponseDTO.PredictPeople getWaste(
             @RequestParam LocalDate date,
-            @RequestParam String mealType,
-            @RequestParam String weather
+            @RequestParam String mealType
     ) {
-        return atePeopleService.getPredictPeople(date, mealType, weather);
+        return atePeopleService.getPredictPeople(date, mealType);
     }
 }
