@@ -54,4 +54,25 @@ public class AtePeopleResponseDTO {
         }
     }
 
+    @Getter
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    @Builder(access = AccessLevel.PRIVATE)
+    public static class ComparePeople {
+        private final Long id;
+        private final LocalDate date;
+        private final Long atePeople;
+        private final Long predictPeople;
+        private final MealType mealType;
+        private final Weather weatherStatus; // ✅ enum 기반 필드
+
+        public static ComparePeople toComparePeople(AtePeople atePeople, AtePeople predictPeople, Weather weatherStatus) {
+            return ComparePeople.builder()
+                    .date(atePeople.getDate())
+                    .atePeople(atePeople.getPeople())
+                    .predictPeople(predictPeople.getPeople())
+                    .mealType(atePeople.getMealType())
+                    .weatherStatus(weatherStatus) // ✅ 전달
+                    .build();
+        }
+    }
 }

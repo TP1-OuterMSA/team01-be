@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 @Transactional
 @RequiredArgsConstructor
-public class WeatherServiceImpl implements  WeatherService {
+public class WeatherServiceImpl implements WeatherService {
 
     private final WeatherRepository weatherRepository;
 
