@@ -30,4 +30,10 @@ public class WeatherSchedule {
             System.out.println("날씨 정보 호출 실패");
         }
     }
+
+    @Scheduled(cron = "0 0 21 * * *") // 매일 21:00에 실행 (저녁 9시)
+    public void scheduledShortTermForecast() {
+        System.out.println("🕘 [스케줄링] 단기 예보 수집 시작");
+        weatherService.getShortTermForecast(59, 126); // 서울시청 좌표 예시 (nx=60, ny=127)
+    }
 }

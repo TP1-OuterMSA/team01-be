@@ -104,5 +104,50 @@ public class AtePeopleServiceImpl implements AtePeopleService {
         );
     }
 
+    @Override
+    public AtePeopleResponseDTO.ComparePeople getComparePeople(LocalDate date, String mealType) {
+        MealType finalMealType;
+        try {
+            finalMealType = MealType.valueOf(mealType.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid mealType: " + mealType);
+        }
 
+        AtePeople actual = atePeopleRepository.findByDateAndMealType(date, finalMealType);
+        if (actual == null) {
+            throw new IllegalArgumentException("No actual record found for given date and mealType.");
+        }
+
+        // 예측 시간 계산
+        LocalTime time = switch (finalMealType) {
+            case BREAKFAST -> LocalTime.of(9, 0);
+            case LUNCH     -> LocalTime.of(12, 0);
+            case DINNER    -> LocalTime.of(18, 0);
+        };
+
+        // 날씨 조회
+        String dateStr = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String timeStr = time.format(DateTimeFormatter.ofPattern("HHmm"));
+        WeatherLog weatherLog = weatherRepository.findTopByDateAndTime(dateStr, timeStr);
+        Weather weatherEnum = WeatherConverter.fromStatus(
+                weatherLog != null ? weatherLog.getStatus() : null
+        );
+
+        // 예측값 계산
+        AtePeopleResponseDTO.PredictPeople predicted = getPredictPeople(date, mealType);
+
+        // 예측용 AtePeople 가짜 객체 생성
+        AtePeople predictedAsEntity = AtePeople.builder()
+                .date(date)
+                .mealType(finalMealType)
+                .people(predicted.getPeople())
+                .build();
+
+        // 응답 생성
+        return AtePeopleResponseDTO.ComparePeople.toComparePeople(
+                actual,
+                predictedAsEntity,
+                weatherEnum
+        );
+    }
 }
