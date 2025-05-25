@@ -4,6 +4,7 @@ import com.example.msa_backend.domain.FutureWeatherLog;
 import com.example.msa_backend.domain.WeatherLog;
 import com.example.msa_backend.repository.FutureWeatherRepository;
 import com.example.msa_backend.repository.WeatherRepository;
+import com.example.msa_backend.web.dto.weather.WeatherResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,12 @@ import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -24,7 +29,28 @@ public class WeatherServiceImpl implements WeatherService {
     private final WeatherRepository weatherRepository;
     private final FutureWeatherRepository futureWeatherRepository;
 
-    public String[] getWeather(int x, int y) {
+    @Override
+    public WeatherResponseDTO.PastWeatherDTO getWeather(LocalDate date) {
+        WeatherLog weather = weatherRepository.findTopByDate(date);
+
+        return WeatherResponseDTO.PastWeatherDTO.toDTO(weather);
+    }
+
+    @Override
+    public List<WeatherResponseDTO.FutureWeatherDTO> getFutureWeather() {
+        LocalDate today = LocalDate.now();
+        LocalDate fiveDaysLater = today.plusDays(5);
+
+        // 해당 기간 동안의 특정 시간대 예보만 가져오기
+        List<WeatherLog> logs = futureWeatherRepository.findAllByDateBetween(today.plusDays(1), fiveDaysLater);
+
+
+        return logs.stream()
+                .map(WeatherResponseDTO.FutureWeatherDTO::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public String[] getWeatherFromMA(int x, int y) {
         HttpURLConnection con = null;
         String[] v = new String[5]; // 날짜, 시간, 날씨, 기온, 습도
 
@@ -93,12 +119,15 @@ public class WeatherServiceImpl implements WeatherService {
 
             }
 
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HHmm");
+
             weatherRepository.save(WeatherLog.builder()
-                    .date(v[0])
-                    .time(v[1])
+                    .date(LocalDate.parse(v[0], dateFormatter))      // 예: "20250525"
+                    .time(LocalTime.parse(v[1], timeFormatter))      // 예: "0900"
                     .status(v[2])
-                    .temperature(v[3])
-                    .humidity(v[4])
+                    .temperature(Double.valueOf(v[3]))
+                    .humidity(Double.valueOf(v[4]))
                     .build());
 
             log.info("🌤 날씨 정보 저장 완료: {} {} {} {}℃ {}%", v[0], v[1], v[2], v[3], v[4]);
@@ -113,7 +142,7 @@ public class WeatherServiceImpl implements WeatherService {
         return v;
     }
 
-    public void getShortTermForecast(int x, int y) {
+    public void getShortTermForecastFromMA(int x, int y) {
         HttpURLConnection con = null;
 
         try {
@@ -149,7 +178,7 @@ public class WeatherServiceImpl implements WeatherService {
 
                 if (!fcstDate.equals(currentDate) || !fcstTime.equals(currentTime)) {
                     if (!currentTime.equals("")) {
-                        saveOrUpdateFutureWeather(currentDate, currentTime, sky, pty, tmp, reh);
+                        saveOrUpdateFutureWeather(currentDate, sky, pty, tmp, reh);
                     }
 
                     currentDate = fcstDate;
@@ -167,7 +196,7 @@ public class WeatherServiceImpl implements WeatherService {
 
             // 마지막 항목도 처리
             if (!currentTime.equals("")) {
-                saveOrUpdateFutureWeather(currentDate, currentTime, sky, pty, tmp, reh);
+                saveOrUpdateFutureWeather(currentDate, sky, pty, tmp, reh);
             }
 
             log.info("📅 단기 예보 저장 및 업데이트 완료");
@@ -179,10 +208,10 @@ public class WeatherServiceImpl implements WeatherService {
         }
     }
 
-    private void saveOrUpdateFutureWeather(String date, String time, String sky, String pty, String tmp, String reh) {
+    private void saveOrUpdateFutureWeather(String date, String sky, String pty, String tmp, String reh) {
         String status = convertSkyAndPty(sky, pty);
 
-        FutureWeatherLog existing = futureWeatherRepository.findTopByDateAndTime(date, time);
+        FutureWeatherLog existing = futureWeatherRepository.findTopByDate(LocalDate.parse(date));
 
         if (existing != null) {
             boolean changed = false;
@@ -192,29 +221,28 @@ public class WeatherServiceImpl implements WeatherService {
                 changed = true;
             }
 
-            if (!equalsSafe(existing.getTemperature(), tmp)) {
-                existing.setTemperature(tmp);
+            if (!equalsSafe(String.valueOf(existing.getTemperature()), tmp)) {
+                existing.setTemperature(Double.valueOf(tmp));
                 changed = true;
             }
 
-            if (!equalsSafe(existing.getHumidity(), reh)) {
-                existing.setHumidity(reh);
+            if (!equalsSafe(String.valueOf(existing.getHumidity()), reh)) {
+                existing.setHumidity(Double.valueOf(reh));
                 changed = true;
             }
 
             if (changed) {
                 futureWeatherRepository.save(existing);
-                log.info("🔁 기존 예보 수정됨: {} {} → {}, {}℃, {}%", date, time, status, tmp, reh);
+                log.info("🔁 기존 예보 수정됨: {} → {}, {}℃, {}%", date, status, tmp, reh);
             }
         } else {
             futureWeatherRepository.save(FutureWeatherLog.builder()
-                    .date(date)
-                    .time(time)
+                    .date(LocalDate.parse(date))
                     .status(status)
-                    .temperature(tmp)
-                    .humidity(reh)
+                    .temperature(Double.valueOf(tmp))
+                    .humidity(Double.valueOf(reh))
                     .build());
-            log.info("🆕 새 예보 저장: {} {} → {}, {}℃, {}%", date, time, status, tmp, reh);
+            log.info("🆕 새 예보 저장: {} → {}, {}℃, {}%", date, status, tmp, reh);
         }
     }
 

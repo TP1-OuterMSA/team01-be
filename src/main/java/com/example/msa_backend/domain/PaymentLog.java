@@ -21,8 +21,8 @@ public class PaymentLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
-    private Double amount;
+    private Long amount;
 
     @Enumerated(EnumType.STRING) // ← 이걸 추가!
-    private MealType mealtype;
+    private MealType mealType;
 }

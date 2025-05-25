@@ -15,5 +15,6 @@ public interface AtePeopleRepository extends JpaRepository<AtePeople, Long> {
     List<AtePeople> findAllByDateBetween(LocalDate startDate, LocalDate endDate);
 
     AtePeople findByDateAndMealType(LocalDate date, MealType mealType);
+    List<AtePeople> findAllByDateAndMealType(LocalDate date, MealType mealType);
 
 }

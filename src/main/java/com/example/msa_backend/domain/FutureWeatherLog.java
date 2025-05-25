@@ -8,6 +8,9 @@ import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 @Entity
 @Getter
 @Builder
@@ -21,12 +24,11 @@ public class FutureWeatherLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String date;        // 예: 20250511
-    private String time;        // 예: 0900
+    private LocalDate date;        // 예: 20250511
     @Setter
     private String status;      // 맑음, 흐림 등
     @Setter
-    private String temperature; // ℃
+    private Double temperature; // ℃
     @Setter
-    private String humidity;    // %
+    private Double humidity;    // %
 }

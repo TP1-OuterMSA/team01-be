@@ -85,11 +85,7 @@ public class AtePeopleServiceImpl implements AtePeopleService {
             }
         }
 
-        // 🔍 WeatherLog 조회
-        String dateStr = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String timeStr = time.format(DateTimeFormatter.ofPattern("HHmm"));
-
-        WeatherLog loggedWeather = weatherRepository.findTopByDateAndTime(dateStr, timeStr);
+        WeatherLog loggedWeather = weatherRepository.findTopByDateAndTime(date, time);
         String rawStatus = (loggedWeather != null) ? loggedWeather.getStatus() : null;
         Weather weatherEnum = WeatherConverter.fromStatus(rawStatus);
 
@@ -125,10 +121,7 @@ public class AtePeopleServiceImpl implements AtePeopleService {
             case DINNER    -> LocalTime.of(18, 0);
         };
 
-        // 날씨 조회
-        String dateStr = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String timeStr = time.format(DateTimeFormatter.ofPattern("HHmm"));
-        WeatherLog weatherLog = weatherRepository.findTopByDateAndTime(dateStr, timeStr);
+        WeatherLog weatherLog = weatherRepository.findTopByDateAndTime(date, time);
         Weather weatherEnum = WeatherConverter.fromStatus(
                 weatherLog != null ? weatherLog.getStatus() : null
         );

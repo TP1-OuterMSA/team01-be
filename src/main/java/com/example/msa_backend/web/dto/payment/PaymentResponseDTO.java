@@ -24,7 +24,7 @@ public class PaymentResponseDTO {
         @Builder
         public static class MealTypeInfo {
             private final MealType mealType;
-            private final Double amount;
+            private final Long amount;
         }
 
         public static PaymentDTO toDTO(LocalDate date, List<MealTypeInfo> infos) {

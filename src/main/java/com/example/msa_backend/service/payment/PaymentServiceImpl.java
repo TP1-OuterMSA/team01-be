@@ -37,7 +37,7 @@ public class PaymentServiceImpl implements PaymentService {
         List<PaymentLog> savedLogs = request.getInfos().stream()
                 .map(info -> PaymentLog.builder()
                         .date(date)
-                        .mealtype(info.getMealType())
+                        .mealType(info.getMealType())
                         .amount(info.getAmount())
                         .build())
                 .map(paymentRepository::save)
@@ -46,7 +46,7 @@ public class PaymentServiceImpl implements PaymentService {
         // 2. mealType별 결제 건수 집계
         Map<MealType, Long> countByMealType = savedLogs.stream()
                 .collect(Collectors.groupingBy(
-                        PaymentLog::getMealtype,
+                        PaymentLog::getMealType,
                         Collectors.counting()
                 ));
 
@@ -54,7 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
         List<PaymentResponseDTO.PaymentDTO.MealTypeInfo> infoList = countByMealType.entrySet().stream()
                 .map(entry -> PaymentResponseDTO.PaymentDTO.MealTypeInfo.builder()
                         .mealType(entry.getKey())
-                        .amount(entry.getValue().doubleValue()) // ✅ count → amount 필드에
+                        .amount(entry.getValue())
                         .build())
                 .collect(Collectors.toList());
 
