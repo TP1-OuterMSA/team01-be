@@ -18,14 +18,12 @@ public class AtePeopleResponseDTO {
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder(access = AccessLevel.PRIVATE)
     public static class AtePeopleDTO {
-        private final Long id;
         private final LocalDate date;
         private final Long people;
         private final MealType mealType;
 
         public static AtePeopleDTO toDTO(AtePeople people) {
             return AtePeopleDTO.builder()
-                    .id(people.getId())
                     .date(people.getDate())
                     .people(people.getPeople())
                     .mealType(people.getMealType())
@@ -37,7 +35,6 @@ public class AtePeopleResponseDTO {
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder(access = AccessLevel.PRIVATE)
     public static class PredictPeople {
-        private final Long id;
         private final LocalDate date;
         private final Long people;
         private final MealType mealType;
@@ -45,7 +42,6 @@ public class AtePeopleResponseDTO {
 
         public static PredictPeople toPredictDTO(AtePeople people, Weather weatherStatus) {
             return PredictPeople.builder()
-                    .id(people.getId())
                     .date(people.getDate())
                     .people(people.getPeople())
                     .mealType(people.getMealType())
