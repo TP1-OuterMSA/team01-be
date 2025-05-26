@@ -54,7 +54,6 @@ public class AtePeopleResponseDTO {
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder(access = AccessLevel.PRIVATE)
     public static class ComparePeople {
-        private final Long id;
         private final LocalDate date;
         private final Long atePeople;
         private final Long predictPeople;
