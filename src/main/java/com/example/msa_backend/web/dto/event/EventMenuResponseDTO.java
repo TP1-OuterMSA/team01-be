@@ -1,6 +1,6 @@
 package com.example.msa_backend.web.dto.event;
 
-import com.example.kafka_schemas.EventMenu;
+import com.example.msa_backend.domain.Event;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,11 +17,13 @@ public class EventMenuResponseDTO {
     public static class EventDTO {
         private final String eventTitle;
         private final LocalDate date;
+        private final Long people;
 
-        public static EventDTO from(EventMenu menu) {
+        public static EventDTO from(Event event) {
             return EventDTO.builder()
-                    .eventTitle(menu.getEventTitle())
-                    .date(LocalDate.parse(menu.getDate()))
+                    .eventTitle(event.getTitle())
+                    .date(event.getDate())
+                    .people(event.getPeople())
                     .build();
         }
     }
