@@ -20,10 +20,12 @@ public class Event {
 
     private LocalDate date;
 
-    public static Event fromAvro(com.example.kafka_schemas.EventMenu eventMenu) {
-        return Event.builder()
-                .title(eventMenu.getEventTitle())
-                .date(LocalDate.parse(eventMenu.getDate()))
-                .build();
-    }
+    private Long people;
+//
+//    public static Event fromAvro(com.example.kafka_schemas.EventMenu eventMenu) {
+//        return Event.builder()
+//                .title(eventMenu.getEventTitle())
+//                .date(LocalDate.parse(eventMenu.getDate()))
+//                .build();
+//    }
 }

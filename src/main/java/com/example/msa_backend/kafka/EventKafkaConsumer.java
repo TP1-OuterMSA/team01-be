@@ -6,9 +6,11 @@ import com.example.msa_backend.repository.EventRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.errors.SerializationException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 @RequiredArgsConstructor
@@ -25,14 +27,18 @@ public class EventKafkaConsumer {
         try {
             log.info("Kafka 수신: title={}, date={}", eventMenu.getEventTitle(), eventMenu.getDate());
 
-            // DB 저장
-            Event event = Event.fromAvro(eventMenu);
-            eventRepository.save(event);
+            // 랜덤 참여 인원 생성 (예: 30~100 사이)
+            long people = ThreadLocalRandom.current().nextLong(80, 150);
 
+            Event event = Event.builder()
+                    .title(eventMenu.getEventTitle())
+                    .date(LocalDate.parse(eventMenu.getDate()))
+                    .people(people)  // 필드 추가 필요
+                    .build();
+
+            eventRepository.save(event);
             this.latestEvent = eventMenu;
 
-        } catch (SerializationException e) {
-            log.error("Kafka 역직렬화 실패", e);
         } catch (Exception e) {
             log.error("Kafka 수신 처리 중 예외 발생", e);
         }

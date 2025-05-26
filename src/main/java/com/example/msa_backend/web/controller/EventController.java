@@ -1,12 +1,15 @@
 package com.example.msa_backend.web.controller;
 
-import com.example.kafka_schemas.EventMenu;
-import com.example.msa_backend.kafka.EventKafkaConsumer;
+import com.example.msa_backend.domain.Event;
+import com.example.msa_backend.repository.EventRepository;
 import com.example.msa_backend.web.dto.event.EventMenuResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
+
+import java.time.LocalDate;
+import java.util.List;
+
 
 
 @RestController
@@ -14,18 +17,22 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public class EventController {
 
-    private final EventKafkaConsumer eventKafkaConsumer;
+    private final EventRepository eventRepository;
 
+    @GetMapping("/monthly")
+    public ResponseEntity<?> getMonthlyEvents(
+            @RequestParam int year,
+            @RequestParam int month
+    ) {
+        LocalDate start = LocalDate.of(year, month, 1);
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());  // 해당 월 마지막 날
 
-    @GetMapping("/latest")
-    public ResponseEntity<?> getLatestEvent() {
-        EventMenu latest = eventKafkaConsumer.getLatestEvent();
-        if (latest == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("아직 수신된 Kafka 메시지가 없습니다.");
-        }
+        List<Event> events = eventRepository.findByDateBetween(start, end);
 
-        // Avro 객체 → DTO로 변환 후 반환
-        return ResponseEntity.ok(EventMenuResponseDTO.EventDTO.from(latest));
+        List<EventMenuResponseDTO.EventDTO> dtoList = events.stream()
+                .map(EventMenuResponseDTO.EventDTO::from)
+                .toList();
+
+        return ResponseEntity.ok(dtoList);
     }
 }
