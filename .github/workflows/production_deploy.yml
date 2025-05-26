@@ -11,15 +11,12 @@ permissions:
 
 jobs:
   deploy:
-    if: ${{ github.event.pull_request.merged == true }}
     name: Deploy to ECR and Sync Tag
     runs-on: ubuntu-latest
 
     env:
       AWS_REGION: ap-northeast-2
       APP_NAME: ${{ secrets.APP_NAME }}
-      ENV_SUFFIX: production
-      ECR_REPO: ${{ secrets.APP_NAME }}-${{ env.ENV_SUFFIX }}-repo
       INFRA_REPO: TP1-OuterMSA/msa-infra-main
       SERVICE_PATH: charts/services/${{ secrets.APP_NAME }}
 
@@ -38,9 +35,10 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Get Short Commit SHA
-        id: sha
-        run: echo "TAG=sha-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: Set Dynamic Environment Variables
+        run: |
+          echo "TAG=sha-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "ECR_REPO=${{ secrets.APP_NAME }}-production-repo" >> $GITHUB_ENV
 
       - name: Build and Push Docker Image
         run: |
@@ -52,7 +50,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/${INFRA_REPO}.git
+          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ env.INFRA_REPO }}.git
           cd msa-infra-main
 
           yq e -i ".image.tag = \"$TAG\"" $SERVICE_PATH/values.yaml
