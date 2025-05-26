@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      AWS_REGION: ap-northeast-2
-      APP_NAME: ${{ secrets.APP_NAME }}
+      AWS_REGION: ${{ secrets.CD_AWS_REGION }}
+      APP_NAME: ${{ secrets.CD_APP_NAME }}
       INFRA_REPO: TP1-OuterMSA/msa-infra-main
-      SERVICE_PATH: charts/services/${{ secrets.APP_NAME }}
+      SERVICE_PATH: charts/services/${{ secrets.CD_APP_NAME }}
 
     steps:
       - name: Checkout Source Repo
@@ -27,8 +27,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.CD_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CD_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
@@ -38,7 +38,7 @@ jobs:
       - name: Set Dynamic Environment Variables
         run: |
           echo "TAG=sha-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "ECR_REPO=${{ secrets.APP_NAME }}-production-repo" >> $GITHUB_ENV
+          echo "ECR_REPO=${{ secrets.CD_APP_NAME }}-production-repo" >> $GITHUB_ENV
 
       - name: Build and Push Docker Image
         run: |
@@ -50,7 +50,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ env.INFRA_REPO }}.git
+          git clone https://x-access-token:${{ secrets.CD_GH_PAT }}@github.com/${{ env.INFRA_REPO }}.git
           cd msa-infra-main
 
           yq e -i ".image.tag = \"$TAG\"" $SERVICE_PATH/values.yaml
