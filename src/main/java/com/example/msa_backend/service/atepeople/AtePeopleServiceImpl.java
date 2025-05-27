@@ -80,7 +80,7 @@ public class AtePeopleServiceImpl implements AtePeopleService {
                     int eventParticipants = 0;
                     Event event = eventRepository.findByDate(p.getDate());
                     if (event != null && event.getPeople() != null) {
-                        eventParticipants = (int) Math.round(event.getPeople() / 3.0);
+                        eventParticipants = (int) Math.round(event.getPeople());
                     }
 
                     WeatherLog weather = weatherRepository.findTopByDateAndTime(p.getDate(), p.getTime());
@@ -104,7 +104,7 @@ public class AtePeopleServiceImpl implements AtePeopleService {
         int todayEventPeople = 0;
         Event todayEvent = eventRepository.findByDate(date);
         if (todayEvent != null && todayEvent.getPeople() != null) {
-            todayEventPeople = (int) Math.round(todayEvent.getPeople() / 3.0);
+            todayEventPeople = (int) Math.round(todayEvent.getPeople());
         }
 
         LocalTime time = null;
