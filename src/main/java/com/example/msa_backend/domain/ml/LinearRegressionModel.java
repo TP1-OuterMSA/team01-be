@@ -50,7 +50,8 @@ public class LinearRegressionModel {
     }
 
     public int predict(int weekday, int eventParticipants, double temperature, double humidity, int weatherCode) {
-        return (int) Math.round(a * weekday + b * eventParticipants + c * temperature + d * humidity + e * weatherCode + f);
+        double result = a * weekday + b * eventParticipants + c * temperature + d * humidity + e * weatherCode + f;
+        return Math.max(0, (int) Math.round(result));
     }
 
     public String explainPrediction(int weekday, int eventParticipants, double temperature, double humidity, int weatherCode) {
