@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Getter
 public class AtePeopleResponseDTO {
@@ -58,15 +59,44 @@ public class AtePeopleResponseDTO {
         private final Long atePeople;
         private final Long predictPeople;
         private final MealType mealType;
-        private final Weather weatherStatus; // ✅ enum 기반 필드
+        private final Weather weatherStatus;
+        private final String description;
 
-        public static ComparePeople toComparePeople(AtePeople atePeople, AtePeople predictPeople, Weather weatherStatus) {
+        public static ComparePeople toComparePeople(AtePeople atePeople, AtePeople predictPeople, Weather weatherStatus, String description) {
             return ComparePeople.builder()
                     .date(atePeople.getDate())
                     .atePeople(atePeople.getPeople())
                     .predictPeople(predictPeople.getPeople())
                     .mealType(atePeople.getMealType())
-                    .weatherStatus(weatherStatus) // ✅ 전달
+                    .weatherStatus(weatherStatus)
+                    .description(description)// ✅ 전달
+                    .build();
+        }
+    }
+
+    @Getter
+    @Builder(access = AccessLevel.PRIVATE)
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class PredictPeopleWithExplanation {
+        private final LocalDate date;
+        private final LocalTime time;
+        private final MealType mealType;
+        private final Long people;
+        private final Weather weather;
+        private final String explanation;
+
+        public static PredictPeopleWithExplanation of(
+                AtePeople atePeople,
+                Weather weather,
+                String explanation
+        ) {
+            return PredictPeopleWithExplanation.builder()
+                    .date(atePeople.getDate())
+                    .time(atePeople.getTime())
+                    .mealType(atePeople.getMealType())
+                    .people(atePeople.getPeople())
+                    .weather(weather)
+                    .explanation(explanation)
                     .build();
         }
     }

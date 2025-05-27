@@ -17,5 +17,17 @@ public class WeatherConverter {
         };
     }
 
-}
+    // ✅ 숫자 코드 반환용 메소드 (회귀 분석용)
+    public static int toCode(String status) {
+        if (status == null) return 5;
 
+        return switch (status) {
+            case "맑음" -> 0;
+            case "구름많음" -> 1;
+            case "흐림" -> 2;
+            case "비", "비/눈", "빗방울", "빗방울눈날림" -> 3;
+            case "눈", "눈날림" -> 4;
+            default -> 5; // 기타 (미정 등)
+        };
+    }
+}

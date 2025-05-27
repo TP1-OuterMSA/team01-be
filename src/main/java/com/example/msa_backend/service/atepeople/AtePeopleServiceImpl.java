@@ -54,9 +54,9 @@ public class AtePeopleServiceImpl implements AtePeopleService {
     }
 
     @Override
-    public AtePeopleResponseDTO.PredictPeople getPredictPeople(LocalDate date, String mealType) {
+    public AtePeopleResponseDTO.PredictPeopleWithExplanation getPredictPeople(LocalDate date, String mealType) {
         LocalDate toDate = date.minusDays(1);       // 전날
-        LocalDate fromDate = toDate.minusDays(6);   // 1주일 전
+        LocalDate fromDate = toDate.minusDays(13);  // 2주치
 
         List<AtePeople> filtered = atePeopleRepository.findAllByDateBetween(fromDate, toDate);
 
@@ -73,43 +73,40 @@ public class AtePeopleServiceImpl implements AtePeopleService {
             }
         }
 
-        // 1. 학습용 DataPoint 구성
+        // 학습용 DataPoint 구성
         List<DataPoint> dataPoints = filtered.stream()
                 .map(p -> {
                     int weekday = p.getDate().getDayOfWeek().getValue() % 7;
                     int eventParticipants = 0;
-
                     Event event = eventRepository.findByDate(p.getDate());
                     if (event != null && event.getPeople() != null) {
-                        eventParticipants = (int) Math.round(event.getPeople() / 3.0); // 3끼 식사에 나눠 적용
+                        eventParticipants = (int) Math.round(event.getPeople() / 3.0);
                     }
 
-                    return new DataPoint(weekday, eventParticipants, Math.toIntExact(p.getPeople()));
+                    WeatherLog weather = weatherRepository.findTopByDateAndTime(p.getDate(), p.getTime());
+                    double temperature = (weather != null) ? weather.getTemperature() : 20.0;
+                    double humidity = (weather != null) ? weather.getHumidity() : 50.0;
+                    int weatherCode = WeatherConverter.toCode(weather != null ? weather.getStatus() : null);
+
+                    return new DataPoint(weekday, eventParticipants, temperature, humidity, weatherCode, Math.toIntExact(p.getPeople()));
                 })
                 .toList();
 
-        // 2. 회귀 모델 학습
+        // 회귀 모델 학습
         LinearRegressionModel model = new LinearRegressionModel();
-        boolean useRegression = dataPoints.size() >= 3;
-
+        boolean useRegression = dataPoints.size() >= 6;
         if (useRegression) {
             model.train(dataPoints);
         }
 
-        // 3. 예측을 위한 요일 + 행사 인원 계산
+        // 예측용 입력 구성
         int weekday = date.getDayOfWeek().getValue() % 7;
         int todayEventPeople = 0;
-
         Event todayEvent = eventRepository.findByDate(date);
         if (todayEvent != null && todayEvent.getPeople() != null) {
             todayEventPeople = (int) Math.round(todayEvent.getPeople() / 3.0);
         }
 
-        int predictedPeople = useRegression
-                ? model.predict(weekday, todayEventPeople)
-                : Math.toIntExact(Math.round(filtered.stream().mapToLong(AtePeople::getPeople).average().orElse(0)));
-
-        // 4. 식사 시간 계산
         LocalTime time = null;
         if (finalMealType != null) {
             switch (finalMealType) {
@@ -119,20 +116,33 @@ public class AtePeopleServiceImpl implements AtePeopleService {
             }
         }
 
-        // 5. 날씨 정보
         WeatherLog loggedWeather = weatherRepository.findTopByDateAndTime(date, time);
-        String rawStatus = (loggedWeather != null) ? loggedWeather.getStatus() : null;
-        Weather weatherEnum = WeatherConverter.fromStatus(rawStatus);
+        double temperature = (loggedWeather != null) ? loggedWeather.getTemperature() : 20.0;
+        double humidity = (loggedWeather != null) ? loggedWeather.getHumidity() : 50.0;
+        int weatherCode = WeatherConverter.toCode(loggedWeather != null ? loggedWeather.getStatus() : null);
 
-        // 6. 결과 DTO 반환
-        return AtePeopleResponseDTO.PredictPeople.toPredictDTO(
+        int predictedPeople;
+        String explanation;
+
+        if (useRegression) {
+            predictedPeople = model.predict(weekday, todayEventPeople, temperature, humidity, weatherCode);
+            explanation = model.explainPrediction(weekday, todayEventPeople, temperature, humidity, weatherCode);
+        } else {
+            predictedPeople = Math.toIntExact(Math.round(filtered.stream().mapToLong(AtePeople::getPeople).average().orElse(0)));
+            explanation = "충분한 데이터가 없어 단순 평균으로 예측되었습니다.";
+        }
+
+        Weather weatherEnum = WeatherConverter.fromStatus(loggedWeather != null ? loggedWeather.getStatus() : null);
+
+        return AtePeopleResponseDTO.PredictPeopleWithExplanation.of(
                 AtePeople.builder()
                         .date(date)
                         .time(time)
                         .mealType(finalMealType)
                         .people((long) predictedPeople)
                         .build(),
-                weatherEnum
+                weatherEnum,
+                explanation
         );
     }
 
@@ -163,8 +173,8 @@ public class AtePeopleServiceImpl implements AtePeopleService {
                 weatherLog != null ? weatherLog.getStatus() : null
         );
 
-        // 예측값 계산
-        AtePeopleResponseDTO.PredictPeople predicted = getPredictPeople(date, mealType);
+        // 예측값 계산 + 설명
+        AtePeopleResponseDTO.PredictPeopleWithExplanation predicted = getPredictPeople(date, mealType);
 
         // 예측용 AtePeople 가짜 객체 생성
         AtePeople predictedAsEntity = AtePeople.builder()
@@ -177,7 +187,9 @@ public class AtePeopleServiceImpl implements AtePeopleService {
         return AtePeopleResponseDTO.ComparePeople.toComparePeople(
                 actual,
                 predictedAsEntity,
-                weatherEnum
+                weatherEnum,
+                predicted.getExplanation() // 설명 추가
         );
     }
+
 }

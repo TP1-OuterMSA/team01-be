@@ -23,7 +23,7 @@ public class AtePeopleController {
     }
 
     @GetMapping("/predict")
-    public AtePeopleResponseDTO.PredictPeople getPredict(
+    public AtePeopleResponseDTO.PredictPeopleWithExplanation getPredict(
             @RequestParam LocalDate date,
             @RequestParam String mealType
     ) {
