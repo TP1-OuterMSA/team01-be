@@ -10,4 +10,5 @@ import java.util.List;
 public interface WeatherRepository extends JpaRepository<WeatherLog, Long> {
     WeatherLog findTopByDateAndTime(LocalDate date, LocalTime time);
     WeatherLog findTopByDate(LocalDate date);
+
 }
