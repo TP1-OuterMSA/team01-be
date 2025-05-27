@@ -5,26 +5,25 @@ on:
     branches:
       - 'production'
 
+env:
+  APP_ENV: production
+
 permissions:
   id-token: write
   contents: read
 
 jobs:
   deploy:
-    name: Deploy to ECR and Sync Helm Chart
-    runs-on: ubuntu-latest
-
-    env:
-      AWS_REGION: ap-northeast-2
-      APP_NAME: ${{ secrets.CD_APP_NAME }}
-      INFRA_REPO: TP1-OuterMSA/msa-infra-main
-      SERVICE_PATH: charts/services/${{ secrets.CD_APP_NAME }}
+    if: ${{ github.event.pull_request.merged && !contains(github.event.pull_request.labels.*.name, 'Skip:CD') }}
+    name: Deploy
+    runs-on: ubuntu-22.04
+    environment: production
 
     steps:
-      - name: Checkout Source Repo
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Create application.yml file
+      - name: Create application.yml from GitHub Secret
         run: |
           mkdir -p src/main/resources
           echo "${{ secrets.APPLICATION_YML_PROD }}" > src/main/resources/application.yml
@@ -32,34 +31,24 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.CD_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.CD_AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Set Dynamic Environment Variables
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REPO: ${{ secrets.APP_NAME }}-${{ secrets.APP_ENV_PROD }}-repo
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+          DOCKER_TAG: ${{ env.APP_ENV }}
         run: |
-          echo "TAG=sha-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-          echo "ECR_REPO=${{ secrets.CD_APP_NAME }}-production-repo" >> $GITHUB_ENV
-
-      - name: Build and Push Docker Image
-        run: |
-          docker build -t ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$TAG .
-          docker push ${{ steps.login-ecr.outputs.registry }}/$ECR_REPO:$TAG
-
-      - name: Clone Infra Repo and Update Helm Values
-        run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-
-          git clone https://x-access-token:${{ secrets.CD_GH_PAT }}@github.com/${{ env.INFRA_REPO }}.git
-          cd msa-infra-main
-
-          yq e -i ".image.tag = \"$TAG\"" $SERVICE_PATH/values.yaml
-
-          git add $SERVICE_PATH/values.yaml
-          git commit -m "chore($APP_NAME): 이미지 태그 $TAG로 업데이트"
-          git push origin main
+          docker build -f Dockerfile \
+            -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPO:$DOCKER_TAG .
+          docker push $ECR_REPO:$IMAGE_TAG
+          docker push $ECR_REPO:$DOCKER_TAG
