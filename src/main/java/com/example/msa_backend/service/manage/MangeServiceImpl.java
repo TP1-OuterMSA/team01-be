@@ -1,8 +1,6 @@
 package com.example.msa_backend.service.manage;
 
-import com.example.msa_backend.domain.AtePeople;
 import com.example.msa_backend.domain.enums.MealType;
-import com.example.msa_backend.repository.AtePeopleRepository;
 import com.example.msa_backend.service.atepeople.AtePeopleService;
 import com.example.msa_backend.web.dto.manage.ManageResponseDTO;
 import com.example.msa_backend.web.dto.people.AtePeopleResponseDTO;
@@ -29,8 +27,8 @@ public class MangeServiceImpl implements ManageService {
 
         for (MealType mealType : MealType.values()) {
             try {
-                // 1. 예측 인원 조회 (문자열 파라미터로 mealType 넘김)
-                AtePeopleResponseDTO.PredictPeople predicted = atePeopleService.getPredictPeople(date, mealType.name());
+                // 1. 예측 인원 및 설명 조회
+                AtePeopleResponseDTO.PredictPeopleWithExplanation predicted = atePeopleService.getPredictPeople(date, mealType.name());
 
                 if (predicted != null && predicted.getPeople() != null) {
                     long predictedPeople = predicted.getPeople();
@@ -39,7 +37,7 @@ public class MangeServiceImpl implements ManageService {
                     result.add(ManageResponseDTO.ManagePeopleDTO.toDTO(date, staffCount, mealType));
                 }
             } catch (Exception e) {
-                // mealType이 잘못되거나 예측 실패할 경우 스킵
+                log.warn("[ManageService] {} 예측 실패: {}", mealType, e.getMessage());
                 continue;
             }
         }
