@@ -22,6 +22,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create application.yml from secret
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICATION_YML_PROD }}" > src/main/resources/application.yml
+
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
