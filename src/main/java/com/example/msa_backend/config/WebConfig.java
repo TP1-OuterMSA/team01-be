@@ -16,6 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowCredentials(false)
                 .exposedHeaders("Authorization", "Set-Cookie");
+
     }
 }
 //

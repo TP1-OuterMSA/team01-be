@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Getter
 public class AtePeopleResponseDTO {
@@ -18,14 +19,12 @@ public class AtePeopleResponseDTO {
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder(access = AccessLevel.PRIVATE)
     public static class AtePeopleDTO {
-        private final Long id;
         private final LocalDate date;
         private final Long people;
         private final MealType mealType;
 
         public static AtePeopleDTO toDTO(AtePeople people) {
             return AtePeopleDTO.builder()
-                    .id(people.getId())
                     .date(people.getDate())
                     .people(people.getPeople())
                     .mealType(people.getMealType())
@@ -37,7 +36,6 @@ public class AtePeopleResponseDTO {
     @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder(access = AccessLevel.PRIVATE)
     public static class PredictPeople {
-        private final Long id;
         private final LocalDate date;
         private final Long people;
         private final MealType mealType;
@@ -45,7 +43,6 @@ public class AtePeopleResponseDTO {
 
         public static PredictPeople toPredictDTO(AtePeople people, Weather weatherStatus) {
             return PredictPeople.builder()
-                    .id(people.getId())
                     .date(people.getDate())
                     .people(people.getPeople())
                     .mealType(people.getMealType())
@@ -54,4 +51,53 @@ public class AtePeopleResponseDTO {
         }
     }
 
+    @Getter
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    @Builder(access = AccessLevel.PRIVATE)
+    public static class ComparePeople {
+        private final LocalDate date;
+        private final Long atePeople;
+        private final Long predictPeople;
+        private final MealType mealType;
+        private final Weather weatherStatus;
+        private final String description;
+
+        public static ComparePeople toComparePeople(AtePeople atePeople, AtePeople predictPeople, Weather weatherStatus, String description) {
+            return ComparePeople.builder()
+                    .date(atePeople.getDate())
+                    .atePeople(atePeople.getPeople())
+                    .predictPeople(predictPeople.getPeople())
+                    .mealType(atePeople.getMealType())
+                    .weatherStatus(weatherStatus)
+                    .description(description)// ✅ 전달
+                    .build();
+        }
+    }
+
+    @Getter
+    @Builder(access = AccessLevel.PRIVATE)
+    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class PredictPeopleWithExplanation {
+        private final LocalDate date;
+        private final LocalTime time;
+        private final MealType mealType;
+        private final Long people;
+        private final Weather weather;
+        private final String explanation;
+
+        public static PredictPeopleWithExplanation of(
+                AtePeople atePeople,
+                Weather weather,
+                String explanation
+        ) {
+            return PredictPeopleWithExplanation.builder()
+                    .date(atePeople.getDate())
+                    .time(atePeople.getTime())
+                    .mealType(atePeople.getMealType())
+                    .people(atePeople.getPeople())
+                    .weather(weather)
+                    .explanation(explanation)
+                    .build();
+        }
+    }
 }

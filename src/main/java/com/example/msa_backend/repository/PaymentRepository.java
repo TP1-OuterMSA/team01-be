@@ -12,4 +12,6 @@ import java.util.List;
 @Repository
 public interface PaymentRepository extends JpaRepository<PaymentLog, Long> {
 
+    List<PaymentLog> findAllByDateAndMealType(LocalDate date, MealType mealType);
+
 }

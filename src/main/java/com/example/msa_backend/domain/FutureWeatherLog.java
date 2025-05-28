@@ -1,13 +1,14 @@
 package com.example.msa_backend.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -17,16 +18,17 @@ import java.time.LocalTime;
 @DynamicInsert
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class WeatherLog {
+public class FutureWeatherLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;        // 예: 20250511
-    private LocalTime time;        // 예: 0900
+    @Setter
     private String status;      // 맑음, 흐림 등
+    @Setter
     private Double temperature; // ℃
+    @Setter
     private Double humidity;    // %
 }
