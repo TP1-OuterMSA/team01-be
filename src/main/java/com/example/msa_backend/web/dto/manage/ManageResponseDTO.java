@@ -1,8 +1,6 @@
 package com.example.msa_backend.web.dto.manage;
 
-import com.example.msa_backend.domain.AtePeople;
 import com.example.msa_backend.domain.enums.MealType;
-import com.example.msa_backend.domain.enums.Weather;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 
-@Getter
 public class ManageResponseDTO {
 
     @Getter
@@ -20,12 +17,18 @@ public class ManageResponseDTO {
         private final LocalDate date;
         private final Long people;
         private final MealType mealType;
+        private final Long recommendedStaff;     // 운영 인원
+        private final String recommendation;     // 운영 지침
 
-        public static ManagePeopleDTO toDTO(LocalDate date, Long people, MealType mealType) {
+        public static ManagePeopleDTO toDTO(
+                LocalDate date, Long people, MealType mealType, Long recommendedStaff,String recommendation
+        ) {
             return ManagePeopleDTO.builder()
                     .date(date)
                     .people(people)
                     .mealType(mealType)
+                    .recommendedStaff(recommendedStaff)
+                    .recommendation(recommendation)
                     .build();
         }
     }

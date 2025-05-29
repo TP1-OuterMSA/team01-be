@@ -84,15 +84,11 @@ public class AtePeopleResponseDTO {
         private final Long people;
         private final Weather weather;
         private final String explanation;
-        private final Long availableStaff;
-        private final String recommendation;
 
         public static PredictPeopleWithExplanation of(
                 AtePeople atePeople,
                 Weather weather,
-                String explanation,
-                Long availableStaff,
-                String recommendation
+                String explanation
         ) {
             return PredictPeopleWithExplanation.builder()
                     .date(atePeople.getDate())
@@ -101,8 +97,6 @@ public class AtePeopleResponseDTO {
                     .people(atePeople.getPeople())
                     .weather(weather)
                     .explanation(explanation)
-                    .availableStaff(availableStaff)
-                    .recommendation(recommendation)
                     .build();
         }
     }

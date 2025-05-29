@@ -110,9 +110,9 @@ public class AtePeopleServiceImpl implements AtePeopleService {
         LocalTime time = null;
         if (finalMealType != null) {
             switch (finalMealType) {
-                case BREAKFAST -> time = LocalTime.of(9, 0, 0);
-                case LUNCH     -> time = LocalTime.of(12, 0, 0);  // ← 여기!
-                case DINNER    -> time = LocalTime.of(18, 0, 0);
+                case BREAKFAST -> time = LocalTime.of(9, 0);
+                case LUNCH     -> time = LocalTime.of(12, 0);
+                case DINNER    -> time = LocalTime.of(18, 0);
             }
         }
 
@@ -133,16 +133,6 @@ public class AtePeopleServiceImpl implements AtePeopleService {
         }
 
         Weather weatherEnum = WeatherConverter.fromStatus(loggedWeather != null ? loggedWeather.getStatus() : null);
-        Long availableStaff = getAvailableStaff(date, finalMealType);
-
-        double weatherPart = useRegression ? model.getWeatherImpact(weatherCode) : 0.0;
-        String recommendation = getRecommendationMessage(
-                (long) predictedPeople,
-                availableStaff,
-                temperature,
-                humidity,
-                weatherCode,
-                weatherPart);
 
         return AtePeopleResponseDTO.PredictPeopleWithExplanation.of(
                 AtePeople.builder()
@@ -152,9 +142,7 @@ public class AtePeopleServiceImpl implements AtePeopleService {
                         .people((long) predictedPeople)
                         .build(),
                 weatherEnum,
-                explanation,
-                availableStaff,
-                recommendation
+                explanation
         );
     }
 
@@ -204,44 +192,4 @@ public class AtePeopleServiceImpl implements AtePeopleService {
         );
     }
 
-    private String getRecommendationMessage(Long predictedPeople, Long availableStaff,
-                                            double temperature, double humidity, int weatherCode,
-                                            double weatherPart
-    ) {
-        long capacityPerStaff = 50L;
-        long maxCapacity = capacityPerStaff * availableStaff;
-        long gap = predictedPeople - maxCapacity;
-
-        // 날씨 영향 보정
-        if (weatherPart > 15) gap += 20;
-        else if (weatherPart > 10) gap += 10;
-        else if (weatherPart < -5) gap -= 10;
-
-        // 최종 메시지
-        if (gap > 100) {
-            return "🚨 극심한 혼잡 예상! 날씨 영향도 큽니다. 즉각적인 인력 증원이 필요합니다.";
-        } else if (gap > 50) {
-            return "🔺 매우 혼잡할 것으로 예상됩니다. 날씨 조건도 고려해 조치하세요.";
-        } else if (gap > 20) {
-            return "⚠ 혼잡할 수 있습니다. 날씨 영향으로 상황 악화 가능성이 있습니다.";
-        } else if (gap > 0) {
-            return "🔸 다소 붐빌 수 있습니다. 날씨에 따른 변동도 주의하세요.";
-        } else if (gap > -30) {
-            return "✅ 원활한 운영이 예상됩니다.";
-        } else {
-            return "🟢 여유로운 운영이 가능합니다.";
-        }
-    }
-
-
-    private Long getAvailableStaff(LocalDate date, MealType mealType) {
-        // 예: DB 조회 혹은 설정된 기본값
-        // 간단한 예시로 고정값 사용
-        return switch (mealType) {
-            case BREAKFAST -> 5L;
-            case LUNCH -> 11L;
-            case DINNER -> 9L;
-            default -> 6L;
-        };
-    }
 }
