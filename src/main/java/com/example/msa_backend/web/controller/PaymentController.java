@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class PaymentController {
     private final PaymentService paymentService;
 
-    @PostMapping()
+    @PostMapping("/add")
     public PaymentResponseDTO.PaymentDTO postPayment (
             @RequestBody PaymentRequestDTO.addDTO paymentLogDTO
     ) {

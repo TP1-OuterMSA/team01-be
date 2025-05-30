@@ -23,10 +23,18 @@ public class AtePeopleController {
     }
 
     @GetMapping("/predict")
-    public AtePeopleResponseDTO.PredictPeople getWaste(
+    public AtePeopleResponseDTO.PredictPeopleWithExplanation getPredict(
             @RequestParam LocalDate date,
             @RequestParam String mealType
     ) {
         return atePeopleService.getPredictPeople(date, mealType);
+    }
+
+    @GetMapping("/compare")
+    public AtePeopleResponseDTO.ComparePeople getComparePeople(
+            @RequestParam LocalDate date,
+            @RequestParam String mealType
+    ) {
+        return atePeopleService.getComparePeople(date, mealType);
     }
 }
