@@ -37,6 +37,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Inject dummy application.yml (if needed for build only)
+        run: |
+          mkdir -p src/main/resources
+          echo "spring:\n  application:\n    name: dummy" > src/main/resources/application.yml
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
@@ -44,6 +49,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
           DOCKER_TAG: ${{ env.APP_ENV }}
+
         run: |
           docker build -f Dockerfile \
             -t $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG \
