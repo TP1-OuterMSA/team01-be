@@ -57,7 +57,7 @@ public class WeatherSchedule {
             if (existing != null) {
                 existing.setPeople(totalPeople);
                 atePeopleRepository.save(existing);
-                log.info("🔁 AtePeople 갱신: {} {} → {}명", today, mealType, totalPeople);
+//                log.info("🔁 AtePeople 갱신: {} {} → {}명", today, mealType, totalPeople);
             } else {
                 AtePeople newRecord = AtePeople.builder()
                         .date(today)
@@ -66,7 +66,7 @@ public class WeatherSchedule {
                         .people(totalPeople)
                         .build();
                 atePeopleRepository.save(newRecord);
-                log.info("🆕 AtePeople 저장: {} {} → {}명", today, mealType, totalPeople);
+//                log.info("🆕 AtePeople 저장: {} {} → {}명", today, mealType, totalPeople);
             }
         }
 
