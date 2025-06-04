@@ -82,4 +82,8 @@ public class LinearRegressionModel {
                 result, Math.round(result)
         );
     }
+
+    public double getWeatherImpact(int weatherCode) {
+        return e * weatherCode;
+    }
 }

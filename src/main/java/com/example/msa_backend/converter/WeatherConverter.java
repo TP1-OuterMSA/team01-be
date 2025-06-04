@@ -11,7 +11,7 @@ public class WeatherConverter {
         return switch (status) {
             case "맑음" -> Weather.SUNNY;
             case "구름많음", "흐림" -> Weather.CLOUDY;
-            case "비", "비/눈", "빗방울", "빗방울눈날림" -> Weather.RAINY;
+            case "비", "비/눈", "빗방울", "빗방울눈날림", "소나기" -> Weather.RAINY;
             case "눈", "눈날림" -> Weather.SNOWY;
             default -> null; // 또는 throw new IllegalArgumentException("알 수 없는 상태: " + status);
         };
@@ -25,7 +25,7 @@ public class WeatherConverter {
             case "맑음" -> 0;
             case "구름많음" -> 1;
             case "흐림" -> 2;
-            case "비", "비/눈", "빗방울", "빗방울눈날림" -> 3;
+            case "비", "비/눈", "빗방울", "빗방울눈날림", "소나기" -> 3;
             case "눈", "눈날림" -> 4;
             default -> 5; // 기타 (미정 등)
         };

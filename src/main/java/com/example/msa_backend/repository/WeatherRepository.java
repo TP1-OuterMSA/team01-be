@@ -5,10 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
 public interface WeatherRepository extends JpaRepository<WeatherLog, Long> {
     WeatherLog findTopByDateAndTime(LocalDate date, LocalTime time);
     WeatherLog findTopByDate(LocalDate date);
-
 }

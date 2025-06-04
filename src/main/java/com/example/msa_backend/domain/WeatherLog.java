@@ -29,4 +29,15 @@ public class WeatherLog {
     private String status;      // 맑음, 흐림 등
     private Double temperature; // ℃
     private Double humidity;    // %
+
+    @Override
+    public String toString() {
+        return "WeatherLog{" +
+                "date=" + date +
+                ", time=" + time +
+                ", temperature=" + temperature +
+                ", humidity=" + humidity +
+                ", status=" + status +
+                '}';
+    }
 }
