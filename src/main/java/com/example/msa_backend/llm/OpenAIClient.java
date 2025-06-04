@@ -8,6 +8,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class OpenAIClient {
@@ -36,7 +37,7 @@ public class OpenAIClient {
                     "https://api.openai.com/v1/chat/completions", entity, Map.class
             );
 
-            Map firstChoice = ((List<Map>) response.getBody().get("choices")).get(0);
+            Map firstChoice = ((List<Map>) Objects.requireNonNull(response.getBody()).get("choices")).get(0);
             Map message = (Map) firstChoice.get("message");
             return (String) message.get("content");
 
