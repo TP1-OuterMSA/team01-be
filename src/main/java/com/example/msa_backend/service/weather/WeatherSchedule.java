@@ -53,20 +53,23 @@ public class WeatherSchedule {
                 case DINNER -> LocalTime.of(18, 0);
             };
 
-            AtePeople existing = atePeopleRepository.findByDateAndMealType(today, mealType);
-            if (existing != null) {
-                existing.setPeople(totalPeople);
-                atePeopleRepository.save(existing);
-//                log.info("🔁 AtePeople 갱신: {} {} → {}명", today, mealType, totalPeople);
+            List<AtePeople> matches = atePeopleRepository.findAllByDateAndMealType(today, mealType);
+            AtePeople target;
+
+            if (!matches.isEmpty()) {
+                target = matches.get(0); // 또는 가장 오래된, 가장 최신 등 기준 적용
+                target.setPeople(totalPeople);
+                atePeopleRepository.save(target);
+                log.info("🔁 AtePeople 갱신: {} {} → {}명", today, mealType, totalPeople);
             } else {
-                AtePeople newRecord = AtePeople.builder()
+                target = AtePeople.builder()
                         .date(today)
                         .time(fixedTime)
                         .mealType(mealType)
                         .people(totalPeople)
                         .build();
-                atePeopleRepository.save(newRecord);
-//                log.info("🆕 AtePeople 저장: {} {} → {}명", today, mealType, totalPeople);
+                atePeopleRepository.save(target);
+                log.info("🆕 AtePeople 저장: {} {} → {}명", today, mealType, totalPeople);
             }
         }
 

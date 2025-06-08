@@ -8,13 +8,14 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AtePeopleRepository extends JpaRepository<AtePeople, Long> {
 
     List<AtePeople> findAllByDateBetween(LocalDate startDate, LocalDate endDate);
 
-    AtePeople findByDateAndMealType(LocalDate date, MealType mealType);
+    Optional<AtePeople> findByDateAndMealType(LocalDate date, MealType mealType);
     List<AtePeople> findAllByDateAndMealType(LocalDate date, MealType mealType);
 
 }
