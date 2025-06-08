@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.example.msa_backend.global.Constants.ANALYTICS_TEAM_URL;
+
 
 @RestController
-@RequestMapping("/manage")
+@RequestMapping(ANALYTICS_TEAM_URL + "/manage")
 @RequiredArgsConstructor
 public class ManageController {
     private final ManageService manageService;

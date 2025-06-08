@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static com.example.msa_backend.global.Constants.ANALYTICS_TEAM_URL;
+
 
 @RestController
-@RequestMapping("/waste")
+@RequestMapping(ANALYTICS_TEAM_URL + "/waste")
 @RequiredArgsConstructor
 public class FoodWasteController {
     private final FoodWasteService foodWasteService;
