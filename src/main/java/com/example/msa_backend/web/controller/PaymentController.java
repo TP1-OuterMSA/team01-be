@@ -6,9 +6,11 @@ import com.example.msa_backend.web.dto.payment.PaymentResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import static com.example.msa_backend.global.Constants.ANALYTICS_TEAM_URL;
+
 
 @RestController
-@RequestMapping("/pay")
+@RequestMapping(ANALYTICS_TEAM_URL + "/pay")
 @RequiredArgsConstructor
 public class PaymentController {
     private final PaymentService paymentService;

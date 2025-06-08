@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.example.msa_backend.global.Constants.ANALYTICS_TEAM_URL;
+
 @RestController
-@RequestMapping("/weather")
+@RequestMapping(ANALYTICS_TEAM_URL + "/weather")
 @RequiredArgsConstructor
 public class WeatherController{
     private final WeatherService weatherService;

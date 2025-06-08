@@ -10,10 +10,11 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.example.msa_backend.global.Constants.ANALYTICS_TEAM_URL;
 
 
 @RestController
-@RequestMapping("/event")
+@RequestMapping(ANALYTICS_TEAM_URL + "/event")
 @RequiredArgsConstructor
 public class EventController {
 

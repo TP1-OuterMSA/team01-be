@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.example.msa_backend.global.Constants.ANALYTICS_TEAM_URL;
+
 @RestController
-@RequestMapping("/api/llm")
+@RequestMapping(ANALYTICS_TEAM_URL + "/api/llm")
 public class EventMealRecommendController {
 
     private final OpenAIClient openAIClient;

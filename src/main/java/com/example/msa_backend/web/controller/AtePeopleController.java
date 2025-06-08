@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 
+import static com.example.msa_backend.global.Constants.ANALYTICS_TEAM_URL;
+
 
 @RestController
-@RequestMapping("/people")
+@RequestMapping(ANALYTICS_TEAM_URL + "/people")
 @RequiredArgsConstructor
 public class AtePeopleController {
     private final AtePeopleService atePeopleService;
