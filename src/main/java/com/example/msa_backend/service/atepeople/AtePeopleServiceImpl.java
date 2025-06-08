@@ -40,14 +40,13 @@ public class AtePeopleServiceImpl implements AtePeopleService {
         MealType mealType = atePeopleRequestDTO.getMealType();
 
         // 해당 날짜 + 식사 타입이 있는지 확인
-        AtePeople existing = atePeopleRepository.findByDateAndMealType(date, mealType);
+        List<AtePeople> existingList = atePeopleRepository.findAllByDateAndMealType(date, mealType);
 
-        if (existing != null) {
-            // 기존 데이터가 있으면 값 업데이트
+        if (!existingList.isEmpty()) {
+            AtePeople existing = existingList.get(0); // 또는 가장 최신/가장 오래된 등 로직 선택
             existing.setPeople(atePeopleRequestDTO.getPeople());
             return AtePeopleConverter.toAtePeopleResponseDTO(existing);
         } else {
-            // 없으면 새로 생성
             AtePeople atePeople = AtePeopleConverter.toAtePeople(atePeopleRequestDTO);
             return AtePeopleConverter.toAtePeopleResponseDTO(atePeopleRepository.save(atePeople));
         }
@@ -156,10 +155,14 @@ public class AtePeopleServiceImpl implements AtePeopleService {
             throw new IllegalArgumentException("Invalid mealType: " + mealType);
         }
 
-        AtePeople actual = atePeopleRepository.findByDateAndMealType(date, finalMealType);
-        if (actual == null) {
+        List<AtePeople> matches = atePeopleRepository.findAllByDateAndMealType(date, finalMealType);
+        if (matches.isEmpty()) {
             throw new IllegalArgumentException("No actual record found for given date and mealType.");
         }
+        if (matches.size() > 1) {
+            log.warn("중복 AtePeople 레코드 발견: {} {}", date, finalMealType);
+        }
+        AtePeople actual = matches.get(0); // 혹은 원하는 기준 정해서 선택
 
         // 예측 시간 계산
         LocalTime time = switch (finalMealType) {
